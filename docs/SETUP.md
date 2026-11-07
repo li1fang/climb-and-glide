@@ -41,6 +41,17 @@ Unity CLI 仍为实验性工具；安装方法以其官方文档为准。包声�
 
 手动运行 `game/Builds/Windows/ClimbDemo.exe`：Q/E 模拟拉绳，Space 平台起飞，F 直接飞行，C 回到梯子，Tab 换目标，鼠标右键观察。完整按键见 README。
 
+[人工桌面试玩说明](DESKTOP_PLAYTEST.zh-CN.md) 包含五分钟建议流程。自动试用启动会等待至少 3 秒总预热、连续至少 1 秒且 60 帧稳定帧（每帧不超过 100 ms），在当前已验证帧开始运行；45 秒仍不稳定则失败。正式运行仍保留核心长帧暂停，并输出 failure.json、退出码 3，失败证据也复制到 artifacts。
+
+可控故障复现（仅 `--auto-trial` 有效，人工操作不会触发）：
+
+```powershell
+.\scripts\run-a2.ps1 -SkipBuild -Stall Startup # 就绪边界阻塞 2300 ms，预期恢复并跑完整路线
+.\scripts\run-a2.ps1 -SkipBuild -Stall Runtime # 正式运行后阻塞 2300 ms，预期失败并保存 session_paused
+```
+
+启动卡顿不占用游戏时间；正式运行的卡顿不允许悄悄跳过。startup.json 记录启动时间、稳定窗口中断次数和是否注入故障。历史 A2 包没有此文件，新分析器针对修复后构建，分析旧证据请使用对应旧提交。
+
 ## 范围与故障定位
 
 - 当前画面使用 Resources 内的自定义灰盒 shader；安装 URP 包不表示实际启用 URP 管线。

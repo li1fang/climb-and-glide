@@ -11,13 +11,14 @@
 | 纯 C# 核心、兼容性、A0 完整流程 | 已通过；[A0 报告](A0_AUTOMATED_TRIAL.zh-CN.md)、`scripts/test-core.ps1 -Trial` |
 | A1 原生编译、实际 Windows 画面 | 已通过；[A1 报告](A1_REVIEW.zh-CN.md)，历史基线 |
 | A2 地形落差、导航、运动参照 | 已通过桌面自动化与代表性截图复查；[A2 报告](A2_REVIEW.zh-CN.md) |
+| 自动试用启动长帧修复 | 已原生构建；3 次完整试用通过（含 2 次启动边界卡顿），1 次运行中卡顿按预期报错退出；[修复复盘](STARTUP_FIX_REVIEW.zh-CN.md) |
 | 人工桌面体验、趣味性与舒适度 | 未验收；自动驾驶成绩不能代替人工试玩 |
 | Quest Pro PC VR、手势、控制器实际执行 | 未验收 |
 | PUMP、BLE、真实绳长与力反馈 | 未接入，不在本阶段执行 |
 | M1/M2 全部验收 | 尚未完成；桌面子项通过不等于 VR 门槛通过 |
 | 开源 | 已公开：[li1fang/climb-and-glide](https://github.com/li1fang/climb-and-glide)，MIT，`main` 分支；名称为临时工作名 |
 
-当前已知自动化限制：固定时长的启动预热并不保证下一帧稳定。开源整理时的一次已有包复测在首个记录帧出现 2.28 s 长帧，触发暂停，未完成流程；详见 [本轮整理记录](SOURCE_RELEASE_REVIEW.zh-CN.md)。历史 A2 成功记录不因此改写，但不能把自动试用称为稳定无人值守。
+自动试用现使用连续稳定帧启动门槛，在验证过的同一帧开始流程；正式运行的长帧仍触发暂停，并保存失败证据、退出，不自动恢复或掩盖失败。此前固定预热失败的[历史记录](SOURCE_RELEASE_REVIEW.zh-CN.md)保留。当前桌面包已可供人工试玩，入口与按键见[桌面试玩说明](DESKTOP_PLAYTEST.zh-CN.md)；真人趣味性与舒适度仍未验收。
 
 ## 各类事实的唯一维护位置
 
@@ -31,6 +32,7 @@
 | 飞行、梯子默认参数 | `FlightConfig.cs`、`LadderConfig.cs`；均位于 `game/Assets/Climb/Runtime/Core/` |
 | 地形、目标、坐标计算 | 同目录 `ValleyCourse.cs` |
 | 状态转换 | 同目录 `DemoSession.cs` |
+| 自动试用启动稳定窗口 | 同目录 `TrialStartupGate.cs`；Unity 驱动负责超时、证据与退出 |
 | 安装与执行方法 | [SETUP.md](SETUP.md)、`scripts/` 中实际入口 |
 | 某次验收结果及限制 | 对应 A0/A1/A2 报告；原始本机记录在被 Git 忽略的 `artifacts/` |
 | 开源范围与发布前待决项 | [开源准备](OPEN_SOURCE.zh-CN.md) |

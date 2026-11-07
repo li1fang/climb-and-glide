@@ -13,6 +13,7 @@ namespace Climb.Tests
                 LadderChecks.Run();
                 Console.WriteLine("PASS LadderChecks");
                 ValleyChecks.Run();
+                StartupChecks.Run();
                 if (args.Length == 2 && args[0] == "--trial") AutomatedTrial.RunAll(args[1]);
                 return 0;
             }

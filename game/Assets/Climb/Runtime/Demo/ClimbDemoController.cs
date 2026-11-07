@@ -37,6 +37,9 @@ namespace Climb.Demo
         private bool _previousConfirm, _focused = true;
         private string _status = "";
         private bool _autoTrial, _trialPrimed;
+        private readonly TrialStartupGate _startupGate = new TrialStartupGate();
+        private float _startupElapsed;
+        private bool _startupFaultInjected, _runtimeFaultInjected, _trialFailed;
         private float _trialTime;
         private System.IO.StreamWriter _trialLog;
         private int _landedFrames;
@@ -68,7 +71,7 @@ namespace Climb.Demo
             if (_rig == null) return;
             float dt = Time.unscaledDeltaTime;
             var keyboard = Keyboard.current;
-            if (keyboard != null)
+            if (keyboard != null && !_autoTrial)
             {
                 if (keyboard.tabKey.wasPressedThisFrame) _targetIndex = (_targetIndex + 1) % _targets.Length;
                 if (keyboard.pKey.wasPressedThisFrame) TogglePause();
@@ -86,12 +89,28 @@ namespace Climb.Demo
             bool confirm = keyboard != null && keyboard.spaceKey.isPressed;
             bool inputValid = ReadXRControls(ref leftTarget, ref rightTarget, ref confirm);
             if (_autoTrial) {
-                _trialTime += dt;
+                if (_trialFailed) return;
                 if (!_trialPrimed) {
+                    _startupElapsed += dt;
                     ApplySessionView(); UpdateView(); UpdateStatus();
-                    if (_trialTime < 3f) return;
-                    _session.ResetLadder(); _trialPrimed = true; _trialTime = 0;
-                    return;
+                    if (_startupElapsed > 45f) { FailTrial("startup_unstable", dt); return; }
+                    if (!_startupGate.Observe(dt)) return;
+                    if (!_startupFaultInjected && HasTrialFlag("--trial-startup-stall")) {
+                        _startupFaultInjected = true;
+                        Debug.Log("A2 injecting startup boundary stall: 2300 ms");
+                        System.Threading.Thread.Sleep(2300); return;
+                    }
+                    _session.ResetLadder(); _previousConfirm = false;
+                    _trialPrimed = true; _trialTime = 0;
+                    System.IO.File.WriteAllText(System.IO.Path.Combine(_trialDirectory, "startup.json"),
+                        System.FormattableString.Invariant($"{{\"elapsed\":{_startupElapsed},\"interruptions\":{_startupGate.Interruptions},\"injected\":{_startupFaultInjected.ToString().ToLowerInvariant()},\"acceptedDt\":{dt}}}"));
+                    Debug.Log("A2 startup ready; beginning on the validated frame");
+                }
+                _trialTime += dt;
+                if (!_runtimeFaultInjected && _trialTime > 5 && HasTrialFlag("--trial-runtime-stall")) {
+                    _runtimeFaultInjected = true;
+                    Debug.Log("A2 injecting runtime stall: 2300 ms");
+                    System.Threading.Thread.Sleep(2300);
                 }
                 _trialLog.WriteLine(System.FormattableString.Invariant($"{_trialTime},{dt},{_mode},{_displayHeight},{_session.Flight.Position.X},{_session.Flight.Position.Z},{_rig.position.y},{_rig.position.y-ValleyCourse.Height(_rig.position.x,_rig.position.z)},{TargetDistance()},{TargetBearing()},{_targetIndex}"));
                 inputValid = true;
@@ -119,12 +138,26 @@ namespace Climb.Demo
 
             if ((_focused || _autoTrial) && dt > 0f)
                 _session.Step(dt, leftTarget, rightTarget, confirmPressed, inputValid);
+            if (_autoTrial && _session.Paused) { FailTrial("session_paused", dt); return; }
             ApplySessionView();
 
             UpdateView();
             if (_mode == DemoMode.Flying && _lookPitch == 12) _lookPitch = 18;
             UpdateHandles();
             UpdateStatus();
+        }
+
+        private static bool HasTrialFlag(string flag) =>
+            System.Array.IndexOf(System.Environment.GetCommandLineArgs(), flag) >= 0;
+
+        private void FailTrial(string reason, float dt)
+        {
+            _trialFailed = true;
+            _trialLog.Flush();
+            System.IO.File.WriteAllText(System.IO.Path.Combine(_trialDirectory, "failure.json"),
+                System.FormattableString.Invariant($"{{\"reason\":\"{reason}\",\"dt\":{dt},\"time\":{_trialTime},\"paused\":{_session.Paused.ToString().ToLowerInvariant()}}}"));
+            Debug.LogError("A2 trial failed: " + reason);
+            Application.Quit(3);
         }
 
         private void ApplySessionView()

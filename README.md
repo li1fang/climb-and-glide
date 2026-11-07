@@ -27,6 +27,7 @@ This is progress toward M1/M2, not a claim that either milestone has passed all 
 - [Architecture and efficiency review](docs/ARCHITECTURE_REVIEW.zh-CN.md)
 - [Open-source preparation](docs/OPEN_SOURCE.zh-CN.md)
 - [Third-party dependencies](THIRD_PARTY_NOTICES.md)
+- [Desktop playtest guide (中文)](docs/DESKTOP_PLAYTEST.zh-CN.md)
 
 ## Offline checks
 
