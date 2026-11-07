@@ -1,0 +1,9 @@
+* text=auto
+*.cs text eol=lf
+*.md text eol=lf
+*.mjs text eol=lf
+*.ps1 text eol=crlf
+# Unity serializes empty YAML values with trailing spaces. Preserve its output.
+*.meta -whitespace
+*.asset -whitespace
+*.unity -whitespace

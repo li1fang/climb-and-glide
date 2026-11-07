@@ -1,0 +1,7 @@
+{
+  "name": "Climb.Core",
+  "rootNamespace": "Climb.Core",
+  "references": [],
+  "autoReferenced": true,
+  "noEngineReferences": true
+}
