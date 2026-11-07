@@ -26,4 +26,4 @@
 3. 只提交清单内源码；检查暂存差异，再创建 public 远端并推送。不要推送本地 artifacts 或 tools。
 4. 读回 GitHub 仓库和提交，确认 README、许可与文件列表；记录首个公开提交。
 
-当前尚未创建公开仓库、推送代码或发布 Release；这份准备稿不能称为已开源。
+已完成公开源码发布：[li1fang/climb-and-glide](https://github.com/li1fang/climb-and-glide)，`main`，首个提交 `87c26f07579b91f9596cb83cb9784ae439d1beda`。已从 GitHub 读回确认 PUBLIC、MIT 和源码目录。未发布下载型 Release，构建产物与本机证据仍不公开。
