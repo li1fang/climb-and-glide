@@ -1,0 +1,172 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39fa3d8997a24136984ca6e2c99902bc, type: 3}
+  m_Name: PcVrActions
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.InputActionAsset
+  m_ActionMaps:
+  - m_Name: Flight
+    m_Id: 
+    m_Asset: {fileID: 11400000}
+    m_Actions:
+    - m_Name: LeftPull
+      m_Type: 0
+      m_ExpectedControlType: 
+      m_Id: 8b50b57b-2867-45eb-b4e3-d1d894bc1411
+      m_Processors: 
+      m_Interactions: 
+      m_SingletonActionBindings: []
+      m_Flags: 0
+      m_Priority: 0
+    - m_Name: RightPull
+      m_Type: 0
+      m_ExpectedControlType: 
+      m_Id: 3fe03ede-071f-4d4c-a972-0811510326dc
+      m_Processors: 
+      m_Interactions: 
+      m_SingletonActionBindings: []
+      m_Flags: 0
+      m_Priority: 0
+    - m_Name: Accept
+      m_Type: 1
+      m_ExpectedControlType: 
+      m_Id: f8cc6e82-fd5c-415f-9422-91a8a84edeb1
+      m_Processors: 
+      m_Interactions: 
+      m_SingletonActionBindings: []
+      m_Flags: 0
+      m_Priority: 0
+    - m_Name: Pause
+      m_Type: 1
+      m_ExpectedControlType: 
+      m_Id: 60d69382-502b-45fa-b845-a024bdf9ea27
+      m_Processors: 
+      m_Interactions: 
+      m_SingletonActionBindings: []
+      m_Flags: 0
+      m_Priority: 0
+    - m_Name: Target
+      m_Type: 1
+      m_ExpectedControlType: 
+      m_Id: e60ac6cb-abcb-4da9-9173-c4c914c0d55a
+      m_Processors: 
+      m_Interactions: 
+      m_SingletonActionBindings: []
+      m_Flags: 0
+      m_Priority: 0
+    - m_Name: Reset
+      m_Type: 1
+      m_ExpectedControlType: 
+      m_Id: 9fadf333-d5e6-4865-b164-9f41f00fa7ba
+      m_Processors: 
+      m_Interactions: 
+      m_SingletonActionBindings: []
+      m_Flags: 0
+      m_Priority: 0
+    m_Bindings:
+    - m_Name: 
+      m_Id: 5b02bc88-9c30-468f-b37d-4c23dcf8ff13
+      m_Path: <OculusTouchController>{LeftHand}/trigger
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: LeftPull
+      m_Flags: 0
+    - m_Name: 
+      m_Id: d6f64972-31cc-4732-9cf3-87e530c105cf
+      m_Path: <QuestProTouchController>{LeftHand}/trigger
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: LeftPull
+      m_Flags: 0
+    - m_Name: 
+      m_Id: 6f7056a1-7fe3-4c75-b44c-b0a66bdbc07f
+      m_Path: <OculusTouchController>{RightHand}/trigger
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: RightPull
+      m_Flags: 0
+    - m_Name: 
+      m_Id: 20bf33a5-96ff-4b58-b3d9-f6da81fbc6e8
+      m_Path: <QuestProTouchController>{RightHand}/trigger
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: RightPull
+      m_Flags: 0
+    - m_Name: 
+      m_Id: 1f5ce758-0bc9-402e-adcc-090847af4450
+      m_Path: <OculusTouchController>{RightHand}/primaryButton
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Accept
+      m_Flags: 0
+    - m_Name: 
+      m_Id: 31e61bed-d8ad-4b09-9d7d-d55111a2bb10
+      m_Path: <QuestProTouchController>{RightHand}/primaryButton
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Accept
+      m_Flags: 0
+    - m_Name: 
+      m_Id: 9e73baec-2cb5-4d54-92d5-8b613efe418c
+      m_Path: <OculusTouchController>{RightHand}/secondaryButton
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Pause
+      m_Flags: 0
+    - m_Name: 
+      m_Id: c98ff7d2-be45-4299-95f9-12a7f1667a5a
+      m_Path: <QuestProTouchController>{RightHand}/secondaryButton
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Pause
+      m_Flags: 0
+    - m_Name: 
+      m_Id: 69936497-6b95-4fe8-b08a-dd2910d06188
+      m_Path: <OculusTouchController>{LeftHand}/primaryButton
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Target
+      m_Flags: 0
+    - m_Name: 
+      m_Id: eca5de97-b0ac-4e88-80eb-8916f6b3554d
+      m_Path: <QuestProTouchController>{LeftHand}/primaryButton
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Target
+      m_Flags: 0
+    - m_Name: 
+      m_Id: 901935bb-0752-42e2-888b-00215da8d272
+      m_Path: <OculusTouchController>{LeftHand}/secondaryButton
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Reset
+      m_Flags: 0
+    - m_Name: 
+      m_Id: d8cfd06a-329e-472a-81e0-17b92d7024bd
+      m_Path: <QuestProTouchController>{LeftHand}/secondaryButton
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Reset
+      m_Flags: 0
+  m_ControlSchemes: []
+  m_IsProjectWide: 0

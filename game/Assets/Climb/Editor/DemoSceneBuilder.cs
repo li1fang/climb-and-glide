@@ -24,10 +24,11 @@ namespace Climb.EditorTools
             CreateScene();
         }
 
-        public static void PrepareForBatch()
+        public static void PrepareForBatch(bool includeXr = false)
         {
             // Resolve package settings before BuildPipeline enters its immutable build phase.
             UnityEditor.XR.OpenXR.Features.FeatureHelpers.RefreshFeatures(BuildTargetGroup.Standalone);
+            PcVrConfiguration.Configure(includeXr);
             AssetDatabase.SaveAssets();
             if (!File.Exists(ScenePath)) CreateScene();
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) };
@@ -47,13 +48,24 @@ namespace Climb.EditorTools
         [MenuItem("Climb/Build Windows Demo")]
         public static void BuildWindows()
         {
+            BuildWindowsTarget(false);
+        }
+
+        [MenuItem("Climb/Build PC VR Test")]
+        public static void BuildPcVr() { BuildWindowsTarget(true); }
+
+        public static void BuildDesktopAndPcVr() { BuildWindowsTarget(false); BuildWindowsTarget(true); }
+
+        private static void BuildWindowsTarget(bool vr)
+        {
             if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
-            PrepareForBatch();
-            Directory.CreateDirectory("Builds/Windows");
+            PrepareForBatch(vr);
+            string folder=vr?"Builds/WindowsVR":"Builds/Windows";
+            Directory.CreateDirectory(folder);
             var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
             {
                 scenes = new[] { ScenePath },
-                locationPathName = "Builds/Windows/ClimbDemo.exe",
+                locationPathName = folder+"/ClimbDemo.exe",
                 target = BuildTarget.StandaloneWindows64,
                 options = BuildOptions.Development
             });

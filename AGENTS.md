@@ -5,7 +5,7 @@ Read `docs/STATE.zh-CN.md` for current acceptance status and the source-of-truth
 This is a personal entertainment/demo project: climb a ladder, choose to launch from a platform, and freely paraglide. Windows desktop and Quest Pro PC VR are the first targets. Unity 6.3 LTS is selected; paid purchases require discussion.
 
 ## Current implementation scope
-- A2 adds the plateau/valley, target navigation and terrain references to the rendered Windows synthetic-input trial. PC VR and physical devices remain unvalidated and out of this stage.
+- A2 desktop is the regression baseline. V0 prepares Quest Pro PC VR gliding with Touch Pro trigger input; headset rendering, tracking and comfort remain unvalidated until the user's concentrated test window. No new gameplay or PUMP integration in V0.
 - No Bluetooth scanning, device connection, motor commands, automatic arming, or physical tests without a separate, explicit test instruction.
 - Do not modify C:/projects/power. Reuse its documented evidence, not its manual permission flow as an automatic control API.
 - Ladder v0: alternating meaningful pulls advance upward; inactivity stops. No precise grab/slip/fall detection, no direction-triggered resistance changes. Thresholds are configurable software defaults, not device calibration.

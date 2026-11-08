@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
 using UnityEngine.XR;
-using XRUsage = UnityEngine.XR.CommonUsages;
 
 namespace Climb.Demo
 {
@@ -33,10 +32,10 @@ namespace Climb.Demo
         private readonly Vector3[] _targets = System.Array.ConvertAll(ValleyCourse.Targets, p => new Vector3(p.X,p.Y,p.Z));
         private int _targetIndex;
         private float _lookYaw, _lookPitch;
-        private float _xrHeightOffset = -1f;
         private bool _previousConfirm, _focused = true;
         private string _status = "";
         private bool _autoTrial, _trialPrimed;
+        private PcVrSession _vr;
         private readonly TrialStartupGate _startupGate = new TrialStartupGate();
         private float _startupElapsed;
         private bool _startupFaultInjected, _runtimeFaultInjected, _trialFailed;
@@ -64,6 +63,14 @@ namespace Climb.Demo
             BuildWorld();
             BuildPlayer();
             ResetLadder();
+            if (!_autoTrial && (HasTrialFlag("--vr") || HasTrialFlag("--vr-probe"))) {
+                _vr=gameObject.AddComponent<PcVrSession>();
+                _session.SetPaused(true);
+                _board.transform.SetParent(_camera.transform,false);
+                _board.transform.localPosition=new Vector3(-.75f,-.25f,2f);
+                _board.characterSize=.014f;
+                Application.onBeforeRender += UpdateVrHead;
+            }
         }
 
         private void Update()
@@ -71,7 +78,7 @@ namespace Climb.Demo
             if (_rig == null) return;
             float dt = Time.unscaledDeltaTime;
             var keyboard = Keyboard.current;
-            if (keyboard != null && !_autoTrial)
+            if (keyboard != null && !_autoTrial && _vr==null)
             {
                 if (keyboard.tabKey.wasPressedThisFrame) _targetIndex = (_targetIndex + 1) % _targets.Length;
                 if (keyboard.pKey.wasPressedThisFrame) TogglePause();
@@ -87,7 +94,20 @@ namespace Climb.Demo
             float leftTarget = keyboard != null && keyboard.qKey.isPressed ? 1f : 0f;
             float rightTarget = keyboard != null && keyboard.eKey.isPressed ? 1f : 0f;
             bool confirm = keyboard != null && keyboard.spaceKey.isPressed;
-            bool inputValid = ReadXRControls(ref leftTarget, ref rightTarget, ref confirm);
+            bool inputValid = true;
+            if (_vr!=null) {
+                _vr.Sample(); leftTarget=_vr.Left; rightTarget=_vr.Right; confirm=false;
+                inputValid=_vr.Valid;
+                if(_vr.Pressed("Pause")) _session.SetPaused(true);
+                if(inputValid) {
+                    if(_vr.Pressed("Target")) _targetIndex=(_targetIndex+1)%_targets.Length;
+                    if(_vr.Pressed("Reset")){ResetLadder();_session.SetPaused(true);}
+                    if(_vr.Pressed("Accept") && leftTarget<.05f && rightTarget<.05f){
+                        if(_mode==DemoMode.Climbing || _mode==DemoMode.Landed) Launch(new Vec3(0,92,0));
+                        else _session.SetPaused(false);
+                    }
+                }
+            }
             if (_autoTrial) {
                 if (_trialFailed) return;
                 if (!_trialPrimed) {
@@ -136,7 +156,7 @@ namespace Climb.Demo
             bool confirmPressed = confirm && !_previousConfirm;
             _previousConfirm = confirm;
 
-            if ((_focused || _autoTrial) && dt > 0f)
+            if ((_focused || _autoTrial || _vr!=null) && dt > 0f)
                 _session.Step(dt, leftTarget, rightTarget, confirmPressed, inputValid);
             if (_autoTrial && _session.Paused) { FailTrial("session_paused", dt); return; }
             ApplySessionView();
@@ -195,38 +215,20 @@ namespace Climb.Demo
         private void OnApplicationFocus(bool focused)
         {
             _focused = focused;
-            if (!focused && !_autoTrial) _session?.SetPaused(true);
+            if (!focused && !_autoTrial && _vr==null) _session?.SetPaused(true);
         }
 
-        private static bool ReadXRControls(ref float left, ref float right, ref bool confirm)
+        private void UpdateVrHead()
         {
-            if (!XRSettings.isDeviceActive) return true;
-            var l = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
-            var r = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
-            bool leftValid = l.TryGetFeatureValue(XRUsage.trigger, out float lv);
-            bool rightValid = r.TryGetFeatureValue(XRUsage.trigger, out float rv);
-            if (leftValid) left = Mathf.Max(left, lv);
-            if (rightValid) right = Mathf.Max(right, rv);
-            if (l.TryGetFeatureValue(XRUsage.primaryButton, out bool lb)) confirm |= lb;
-            if (r.TryGetFeatureValue(XRUsage.primaryButton, out bool rb)) confirm |= rb;
-            return leftValid && rightValid;
+            if (_vr != null && _vr.Sample()) {
+                _camera.transform.localPosition=_vr.HeadPosition;
+                _camera.transform.localRotation=_vr.HeadRotation;
+            }
         }
 
         private void UpdateView()
         {
-            if (XRSettings.isDeviceActive)
-            {
-                var head = InputDevices.GetDeviceAtXRNode(XRNode.Head);
-                if (head.TryGetFeatureValue(XRUsage.isTracked, out bool tracked) && tracked)
-                {
-                    Vector3 position = InputTracking.GetLocalPosition(XRNode.Head);
-                    if (_xrHeightOffset < 0f) _xrHeightOffset = position.y < 0.2f ? 1.65f : 0f;
-                    _camera.transform.localPosition = position + Vector3.up * _xrHeightOffset;
-                    _camera.transform.localRotation = InputTracking.GetLocalRotation(XRNode.Head);
-                }
-                return;
-            }
-            _xrHeightOffset = -1f;
+            if (_vr != null) { UpdateVrHead(); return; }
             var mouse = Mouse.current;
             if (mouse != null && mouse.rightButton.isPressed)
             {
@@ -259,8 +261,14 @@ namespace Climb.Demo
             _status = "SYNTHETIC DEMO - NO PUMP / NO FORCE COMMANDS\n" + (_paused ? "PAUSED - P to resume\n" : "") + phase +
                 "\nL " + _leftPull.ToString("0.00") + "  R " + _rightPull.ToString("0.00") + " | ladder " + _displayHeight.ToString("0.00") + " m" +
                 "\nQ/E: pull, release: return | F: air test | C: ladder | R: reset | P: pause\nRMB + mouse: look only. XR triggers simulate rope pulls.\nNormal-flight approximation; valley terrain. XR not yet validated.";
+            if (_vr!=null) _status="PC VR | "+_vr.Status+"\n"+
+                (_paused?"PAUSED - release triggers, A to fly/resume":_mode==DemoMode.Landed?"LANDED - release triggers, A to retry":"FLYING - triggers steer / both brake")+
+                "\nTarget "+(char)('A'+_targetIndex)+" | "+TargetBearing().ToString("0")+" deg | "+TargetDistance().ToString("0")+" m"+
+                "\nAGL "+Mathf.Max(0,_rig.position.y-ValleyCourse.Height(_rig.position.x,_rig.position.z)).ToString("0.0")+
+                " m | Speed "+_session.Flight.Airspeed.ToString("0.0")+" m/s"+
+                "\nA fly/resume | B pause | X target | Y reset";
             _board.text = _status;
-            _board.gameObject.SetActive(XRSettings.isDeviceActive);
+            _board.gameObject.SetActive(_vr!=null);
         }
 
         private float NearestTargetDistance()
@@ -361,12 +369,16 @@ namespace Climb.Demo
 
         private void OnGUI()
         {
-            if (XRSettings.isDeviceActive) return; // World-space TextMesh is the XR-facing status display.
+            if (_vr!=null) {
+                if (!_vr.Running) GUI.Label(new Rect(20,20,1100,100),"PC VR: "+_vr.Status+"\nStart Meta Horizon Link, connect the headset, then restart with scripts/run-pcvr.ps1. Close this window to exit.");
+                return; // World-space TextMesh is the XR-facing status display.
+            }
             DrawNavigation();
         }
 
         private void OnDestroy()
         {
+            Application.onBeforeRender -= UpdateVrHead;
             _trialLog?.Dispose();
             if (_terrainMesh != null) Destroy(_terrainMesh);
             if (_world != null) Destroy(_world.gameObject);

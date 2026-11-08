@@ -9,7 +9,7 @@ Personal Unity demo: alternate pulls to climb a ladder, choose a platform, then 
 - Selected: Unity 6.3 LTS, Windows desktop and Quest Pro PC VR.
 - Implemented source: pure C# normal-flight approximation, alternating-stroke ladder model, generated Unity test scene, platform-to-flight transition and desktop/XR synthetic controls.
 - Verified: offline core checks, native Unity compilation and actual rendered A2 Windows trials with plateau/valley terrain and target navigation. See the A2 review for evidence and limits.
-- Pending: manual keyboard/mouse play, PC VR runtime/loader configuration, Quest execution and physical PUMP integration.
+- PC VR preparation: opt-in OpenXR loader, Touch/Touch Pro action bindings and tracking-aware pause are built. Meta Link installation/login and actual headset execution remain pending. A simple desktop playtest was reported by the owner; physical PUMP integration remains excluded.
 - There is no BLE client or motor-control path in this demo. Private device records are not part of this repository.
 
 This is progress toward M1/M2, not a claim that either milestone has passed all acceptance gates.
@@ -28,6 +28,7 @@ This is progress toward M1/M2, not a claim that either milestone has passed all 
 - [Open-source preparation](docs/OPEN_SOURCE.zh-CN.md)
 - [Third-party dependencies](THIRD_PARTY_NOTICES.md)
 - [Desktop playtest guide (中文)](docs/DESKTOP_PLAYTEST.zh-CN.md)
+- [PC VR preparation and headset acceptance plan (中文)](docs/PCVR_PLAN.zh-CN.md)
 
 ## Offline checks
 
@@ -46,6 +47,8 @@ Open the `game` folder with the pinned Editor version. Wait for package import, 
 The first world is generated from primitives. URP is pinned as a package; a render pipeline asset and its actual rendering still require Editor setup/verification. The graybox uses a shader explicitly included in Resources; its Windows rendering was visually inspected.
 
 PC VR additionally requires Meta Horizon Link, an active OpenXR runtime, and Standalone OpenXR configuration in Unity. Headset tracking and controller-trigger simulation are separate from final hand-gesture UI and from real PUMP input.
+
+`scripts/run-pcvr.ps1` launches the prepared VR mode after Link setup. It starts stationary and paused; release both triggers and press A to fly. The dedicated `Builds/WindowsVR` package contains OpenXR; desktop `Builds/Windows` builds exclude its loader. Actual headset acceptance is still pending.
 
 ## Synthetic controls
 

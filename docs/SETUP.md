@@ -2,6 +2,8 @@
 
 当前验收范围见 [STATE](STATE.zh-CN.md)。本文件是克隆后的操作入口，不是安装历史。
 
+PC VR 独立的准备、启动与佩戴验收步骤见 [PCVR_PLAN](PCVR_PLAN.zh-CN.md)。以下桌面命令仍为默认入口；桌面包排除 XR Loader，独立的 WindowsVR 包由专门脚本启动。
+
 ## 环境
 
 - Windows、Git、PowerShell。

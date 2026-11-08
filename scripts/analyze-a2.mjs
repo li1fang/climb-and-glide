@@ -6,7 +6,11 @@ const rows = fs.readFileSync(path.join(trial,'frames.csv'),'utf8').trim().split(
 const phases = [...new Set(rows.map(x=>x[2]))];
 const dt = rows.map(x=>Number(x[1])*1000).filter(Number.isFinite).sort((a,b)=>a-b);
 const logs=fs.readFileSync(playerLog,'utf8');
-const errors=logs.split(/\r?\n/).filter(x=>/Exception:|Error:|A2 timeout|Shader error/i.test(x));
+// Unity reports an optional video-decoder fallback as "error:". Keep this exact
+// diagnostic visible as a warning; unrelated graphics/runtime errors still fail.
+const optionalVideoFallback=/^Dedicated video D3D11 device creation failed \(error: 0x887a0004\)\. This device is used specifically for video decoding, we will use software video decoding instead\.$/;
+const warnings=logs.split(/\r?\n/).filter(x=>optionalVideoFallback.test(x));
+const errors=logs.split(/\r?\n/).filter(x=>/Exception:|Error:|\[Error\s*\]|A2 timeout|Shader error/i.test(x) && !optionalVideoFallback.test(x));
 const screenshots=['Climbing','PreparingFlight','Flying','FlightMid','Approach','Landed'].map(x=>({phase:x,exists:fs.existsSync(path.join(trial,x+'.png'))}));
 const completion=JSON.parse(fs.readFileSync(path.join(trial,'completed.json'),'utf8'));
 const startup=JSON.parse(fs.readFileSync(path.join(trial,'startup.json'),'utf8'));
@@ -22,6 +26,7 @@ const result={flightFrameMs:{median:flightDt[Math.floor(flightDt.length*.5)],p95
  seconds:Number(rows.at(-1)[0]),phases,frameMs:{median:dt[Math.floor(dt.length*.5)],p95:dt[Math.floor(dt.length*.95)],max:dt.at(-1)},
  screenshots,errors,passed:completion.landed && finite && minimumAgl>=-.02 && initialFlightAltitude>91 && bearingsValid && flightSeconds>40 && phases.join(',')==='Climbing,PreparingFlight,Flying,Landed' && screenshots.every(x=>x.exists) && errors.length===0 && rows.length>100};
 result.startup=startup;
+result.warnings=warnings;
 result.passed=result.passed && startupValid && !fs.existsSync(path.join(trial,'failure.json'));
 fs.writeFileSync(path.join(trial,'analysis.json'),JSON.stringify(result,null,2));
 console.log(JSON.stringify(result,null,2));
